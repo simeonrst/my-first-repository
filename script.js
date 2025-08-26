@@ -15,6 +15,7 @@
   const urlInput = $('#url');
   const iconInput = $('#icon');
   const modalTitle = $('#modalTitle');
+  const categoryInput = $('#category'); // 👈 new category input
 
   const STORAGE_KEY = 'apphub.v1.apps';
   let apps = load();
@@ -34,16 +35,54 @@
     }catch{ return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%2314182a"/><text x="50%" y="54%" font-size="36" text-anchor="middle" fill="%239ca3af">⚙️</text></svg>'; }
   }
 
-  function render(filter=''){
-    grid.innerHTML = '';
-    const list = apps
-      .map((a,i)=>({...a, i}))
-      .filter(a => a.name.toLowerCase().includes(filter) || a.url.toLowerCase().includes(filter));
+function render(filter='') {
+  grid.innerHTML = '';
 
-    list.forEach(app => grid.appendChild(card(app)));
-    empty.style.display = list.length ? 'none' : 'block';
+  const filteredApps = apps
+    .map((a,i) => ({...a, i}))
+    .filter(a => a.name.toLowerCase().includes(filter) || a.url.toLowerCase().includes(filter));
+
+  if(filteredApps.length === 0){
+    empty.style.display = 'block';
     countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
+    return;
   }
+
+  empty.style.display = 'none';
+
+  // Group apps by category
+  const grouped = {};
+  filteredApps.forEach(app => {
+    const cat = app.category || 'General';
+    if(!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(app);
+  });
+
+  // Render each category vertically
+  for(const category in grouped){
+    const categoryWrapper = document.createElement('div');
+    categoryWrapper.className = 'category-column';
+
+    // Category header
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.textContent = category;
+    categoryWrapper.appendChild(header);
+
+    // Apps inside this category
+    grouped[category].forEach(app => {
+      const c = card(app); // use your existing card() function
+      categoryWrapper.appendChild(c);
+    });
+
+    // Add the whole category to the grid
+    grid.appendChild(categoryWrapper);
+  }
+
+  countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
+}
+
+
 
   function card(app){
     const c = document.createElement('div');
@@ -73,7 +112,6 @@
       openEditor(app.i);
     });
 
-
     // Drag & drop reordering
     c.addEventListener('dragstart', e=>{ c.classList.add('dragging'); e.dataTransfer.setData('text/plain', app.i); });
     c.addEventListener('dragend', ()=> c.classList.remove('dragging'));
@@ -87,7 +125,7 @@
   }
 
   function syncOrderFromDOM(){
-    const indices = [...grid.children].map(el=> Number(el.dataset.index));
+    const indices = [...grid.querySelectorAll('.card')].map(el=> Number(el.dataset.index));
     const newOrder = indices.map(i=> apps[i]);
     if(newOrder.length === apps.length){ apps = newOrder; save(); render(search.value.trim().toLowerCase()); }
   }
@@ -99,13 +137,16 @@
       nameInput.value = '';
       urlInput.value = '';
       iconInput.value = '';
+      categoryInput.value = 'General'; // 👈 reset to default
       deleteBtn.style.display = 'none';
     } else {
       modalTitle.textContent = 'Edit App';
       const a = apps[index];
-      nameInput.value = a.name; urlInput.value = a.url; iconInput.value = a.icon || '';
+      nameInput.value = a.name;
+      urlInput.value = a.url;
+      iconInput.value = a.icon || '';
+      categoryInput.value = a.category || 'General'; // 👈 prefill category
       deleteBtn.style.display = 'inline-block';
-
     }
     dialog.showModal();
     setTimeout(()=> nameInput.focus(), 50);
@@ -122,7 +163,8 @@
     const data = {
       name: nameInput.value.trim(),
       url: urlInput.value.trim(),
-      icon: iconInput.value.trim() || null
+      icon: iconInput.value.trim() || null,
+      category: categoryInput.value || "General" // 👈 save category
     };
     if(!data.name || !data.url) return;
     try{ new URL(data.url); }catch{ alert('Please enter a valid URL starting with http(s)://'); return; }
@@ -157,7 +199,8 @@
       const text = await file.text();
       const parsed = JSON.parse(text);
       if(!Array.isArray(parsed)) throw new Error('Invalid format');
-      apps = parsed.filter(a => a && typeof a.name==='string' && typeof a.url==='string').map(a=>({name:a.name,url:a.url,icon:a.icon||null}));
+      apps = parsed.filter(a => a && typeof a.name==='string' && typeof a.url==='string')
+                   .map(a=>({name:a.name,url:a.url,icon:a.icon||null,category:a.category||'General'}));
       save();
       render(search.value.trim().toLowerCase());
     }catch(err){ alert('Could not import this file. Make sure it is a valid JSON export.'); }
@@ -167,11 +210,12 @@
   // Seed with a couple of examples if empty
   if(apps.length===0){
     apps = [
-      { name:'Google', url:'https://google.com', icon:null },
-      { name:'GitHub', url:'https://github.com', icon:null }
+      { name:'Google', url:'https://google.com', icon:null, category:'Work' },
+      { name:'GitHub', url:'https://github.com', icon:null, category:'Tools' }
     ];
     save();
   }
 
   render();
 })();
+
