@@ -223,4 +223,15 @@ document.getElementById("menuBtn").addEventListener("click", function() {
   document.querySelector(".sidebar").classList.toggle("expanded");
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const menuBtn = document.getElementById("menuBtn");
+const sidebarExpand = document.querySelector(".sidebar-expand");
+
+if (menuBtn && sidebarExpand) {
+  menuBtn.addEventListener("click", () => {
+    sidebarExpand.classList.toggle("active");
+  });
+}
+
+});
 

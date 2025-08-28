@@ -26,16 +26,29 @@
   </header>
 
   <div class="sidebar">
+  <!-- Menu button stays at the top -->
   <button class="sidebar-btn" id="menuBtn" title="Menu">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor">
       <path d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>
     </svg>
-    <span>Menu</span>
   </button>
-  <button class="sidebar-btn" title="Home">🏠 <span>Home</span></button>
-  <button class="sidebar-btn" title="Add App">➕ <span>Add App</span></button>
-  <button class="sidebar-btn" title="Settings">⚙️ <span>Settings</span></button>
+
+  <!-- Group other buttons below -->
+  <div class="sidebar-buttons">
+    <button class="sidebar-btn" title="Home">🏠</button>
+    <button class="sidebar-btn" title="Add App">➕</button>
+    <button class="sidebar-btn" title="Settings">⚙️</button>
+  </div>
 </div>
+
+<!-- Expanded panel (hidden by default) -->
+<div class="sidebar-expand" id="sidebarExpand">
+  <div class="expand-content">
+    <p>Extra menu content goes here...</p>
+    <p>Links / Shortcuts / Settings</p>
+  </div>
+</div>
+
 
 
 

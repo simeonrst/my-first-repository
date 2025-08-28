@@ -141,40 +141,64 @@ dialog::backdrop{background:rgba(2,6,23,.6)}
 
 .sidebar {
   position: fixed;
-  top: 30px;
+  top: 20px;
   left:20px;
   height: 90%;
   width: 60px; 
   background: var(--sub);
   border-right: 1px solid #222b3d;
-  border-radius: 80px;
+  border-radius: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 150px; /* adjust this so icons align with categories */
+  padding-top: 40px; /* adjust this so icons align with categories */
   gap: 14px;
   z-index: 20;
   overflow: hidden;        /* hides text when collapsed */
   transition: width 0.3s ease;  /* smooth expand */
 }
 
-/* Expanded state */
-.sidebar.expanded {
-  width: 200px;  /* expand to the right */
-  align-items: flex-start; /* icons + text align left */
-  padding-left: 12px;
+/* Expanded panel (separate) */
+.sidebar-expand {
+  position: fixed;
+  top: 20px;
+  left: 100px; /* little gap after sidebar (60px + 20px gap) */
+  height: 90%;
+  width: 200px;
+  background: var(--muted);
+  border-radius: 70px;
+  padding: 20px;
+ opacity: 0;
+  transform: translateX(-20px); /* start slightly hidden */
+  pointer-events: none;         /* disable clicks when hidden */
+  transition: all 0.3s ease;    /* smooth movement + fade */
+  z-index: 15;
+}
+
+.sidebar-expand.active {
+  opacity: 1;
+  transform: translateX(0);     /* slide in */
+  pointer-events: auto;
 }
 
 .sidebar-btn {
   background: none;
   border: none;
   color: var(--text);
-  font-size: 10px;
+  font-size: 20px;
   cursor: pointer;
   padding: 8px;
   border-radius: 12px;
   transition: background 0.2s;
   gap: 8px;   /* space for icon + label */
+}
+
+/* Group for the other buttons */
+.sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 100px; /* push other buttons below menu */
 }
 
 /* Text labels hidden by default */
