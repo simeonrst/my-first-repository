@@ -219,3 +219,8 @@ function render(filter='') {
   render();
 })();
 
+document.getElementById("menuBtn").addEventListener("click", function() {
+  document.querySelector(".sidebar").classList.toggle("expanded");
+});
+
+
