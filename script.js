@@ -15,7 +15,7 @@
   const urlInput = $('#url');
   const iconInput = $('#icon');
   const modalTitle = $('#modalTitle');
-  const categoryInput = $('#category'); // 👈 new category input
+  const categoryInput = $('#category');
 
   const STORAGE_KEY = 'apphub.v1.apps';
   let apps = load();
@@ -35,54 +35,49 @@
     }catch{ return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%2314182a"/><text x="50%" y="54%" font-size="36" text-anchor="middle" fill="%239ca3af">⚙️</text></svg>'; }
   }
 
-function render(filter='') {
-  grid.innerHTML = '';
+  function render(filter='') {
+    grid.innerHTML = '';
 
-  const filteredApps = apps
-    .map((a,i) => ({...a, i}))
-    .filter(a => a.name.toLowerCase().includes(filter) || a.url.toLowerCase().includes(filter));
+    const filteredApps = apps
+      .map((a,i) => ({...a, i}))
+      .filter(a => a.name.toLowerCase().includes(filter) || a.url.toLowerCase().includes(filter));
 
-  if(filteredApps.length === 0){
-    empty.style.display = 'block';
-    countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
-    return;
-  }
+    if(filteredApps.length === 0){
+      empty.style.display = 'block';
+      countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
+      return;
+    }
 
-  empty.style.display = 'none';
+    empty.style.display = 'none';
 
-  // Group apps by category
-  const grouped = {};
-  filteredApps.forEach(app => {
-    const cat = app.category || 'General';
-    if(!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(app);
-  });
-
-  // Render each category vertically
-  for(const category in grouped){
-    const categoryWrapper = document.createElement('div');
-    categoryWrapper.className = 'category-column';
-
-    // Category header
-    const header = document.createElement('div');
-    header.className = 'category-header';
-    header.textContent = category;
-    categoryWrapper.appendChild(header);
-
-    // Apps inside this category
-    grouped[category].forEach(app => {
-      const c = card(app); // use your existing card() function
-      categoryWrapper.appendChild(c);
+    // Group apps by category
+    const grouped = {};
+    filteredApps.forEach(app => {
+      const cat = app.category || 'General';
+      if(!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(app);
     });
 
-    // Add the whole category to the grid
-    grid.appendChild(categoryWrapper);
+    // Render each category vertically
+    for(const category in grouped){
+      const categoryWrapper = document.createElement('div');
+      categoryWrapper.className = 'category-column';
+
+      const header = document.createElement('div');
+      header.className = 'category-header';
+      header.textContent = category;
+      categoryWrapper.appendChild(header);
+
+      grouped[category].forEach(app => {
+        const c = card(app);
+        categoryWrapper.appendChild(c);
+      });
+
+      grid.appendChild(categoryWrapper);
+    }
+
+    countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
   }
-
-  countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
-}
-
-
 
   function card(app){
     const c = document.createElement('div');
@@ -112,12 +107,19 @@ function render(filter='') {
       openEditor(app.i);
     });
 
-    // Drag & drop reordering
+        // Drag & drop reordering
     c.addEventListener('dragstart', e=>{ c.classList.add('dragging'); e.dataTransfer.setData('text/plain', app.i); });
     c.addEventListener('dragend', ()=> c.classList.remove('dragging'));
-    c.addEventListener('dragover', e=>{ e.preventDefault(); const dragging = document.querySelector('.card.dragging'); if(!dragging||dragging===c) return; const rect=c.getBoundingClientRect(); const after = (e.clientY-rect.top) > rect.height/2; grid.insertBefore(dragging, after? c.nextSibling : c); });
+    c.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const dragging = document.querySelector('.card.dragging');
+      if(!dragging||dragging===c) return;
+      const rect=c.getBoundingClientRect();
+      const after = (e.clientY-rect.top) > rect.height/2;
+      grid.insertBefore(dragging, after? c.nextSibling : c);
+    });
     c.addEventListener('drop', ()=>{ syncOrderFromDOM(); });
-
+    
     // Click opens too
     c.addEventListener('click', ()=> window.open(app.url,'_blank','noopener'));
 
@@ -137,7 +139,7 @@ function render(filter='') {
       nameInput.value = '';
       urlInput.value = '';
       iconInput.value = '';
-      categoryInput.value = 'General'; // 👈 reset to default
+      categoryInput.value = 'General';
       deleteBtn.style.display = 'none';
     } else {
       modalTitle.textContent = 'Edit App';
@@ -145,7 +147,7 @@ function render(filter='') {
       nameInput.value = a.name;
       urlInput.value = a.url;
       iconInput.value = a.icon || '';
-      categoryInput.value = a.category || 'General'; // 👈 prefill category
+      categoryInput.value = a.category || 'General';
       deleteBtn.style.display = 'inline-block';
     }
     dialog.showModal();
@@ -153,7 +155,7 @@ function render(filter='') {
   }
 
   function escapeHtml(s){ return s.replace(/[&<>"']/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])); }
-
+  
   // Events
   addBtn.addEventListener('click', ()=> openEditor(null));
   closeDialog.addEventListener('click', ()=> dialog.close());
@@ -164,7 +166,7 @@ function render(filter='') {
       name: nameInput.value.trim(),
       url: urlInput.value.trim(),
       icon: iconInput.value.trim() || null,
-      category: categoryInput.value || "General" // 👈 save category
+      category: categoryInput.value || "General"
     };
     if(!data.name || !data.url) return;
     try{ new URL(data.url); }catch{ alert('Please enter a valid URL starting with http(s)://'); return; }
@@ -207,7 +209,7 @@ function render(filter='') {
     finally{ importFile.value = ''; }
   });
 
-  // Seed with a couple of examples if empty
+    // Seed with a couple of examples if empty
   if(apps.length===0){
     apps = [
       { name:'Google', url:'https://google.com', icon:null, category:'Work' },
@@ -217,21 +219,19 @@ function render(filter='') {
   }
 
   render();
+
+  const menuBtn = document.getElementById('menuBtn');
+const sidebarExpand = document.querySelector('.sidebar-expand');
+const header = document.querySelector('header');
+const mainContent = document.querySelector('main');
+const footer = document.querySelector('.footer');
+
+menuBtn.addEventListener('click', () => {
+  sidebarExpand.classList.toggle('active');
+  header.classList.toggle('shifted');
+  mainContent.classList.toggle('shifted');
+  footer.classList.toggle('shifted');
+});
 })();
 
-document.getElementById("menuBtn").addEventListener("click", function() {
-  document.querySelector(".sidebar").classList.toggle("expanded");
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const menuBtn = document.getElementById("menuBtn");
-const sidebarExpand = document.querySelector(".sidebar-expand");
-
-if (menuBtn && sidebarExpand) {
-  menuBtn.addEventListener("click", () => {
-    sidebarExpand.classList.toggle("active");
-  });
-}
-
-});
 
