@@ -206,6 +206,16 @@ main.shifted,
   transition: background 0.2s;
 }
 
+/* Favorite button styling */
+.fav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: gold;
+}
+
+
 /* Group for the other buttons */
 .sidebar-buttons {
   display: flex;

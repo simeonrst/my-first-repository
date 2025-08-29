@@ -19,6 +19,9 @@
 
   const STORAGE_KEY = 'apphub.v1.apps';
   let apps = load();
+
+  apps.forEach(a => { if(a.favorite === undefined) a.favorite = false; });
+  
   let editingIndex = null;
 
   function load(){
@@ -86,17 +89,26 @@
     c.dataset.index = app.i;
 
     c.innerHTML = `
-      <div class="app-top">
-        <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
-        <div style="min-width:0">
-          <div class="app-name">${escapeHtml(app.name)}</div>
-          <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn secondary" data-open>Open</button>
-        <button class="btn" data-edit>Edit</button>
-      </div>`;
+  <div class="app-top">
+    <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
+    <div style="min-width:0">
+      <div class="app-name">${escapeHtml(app.name)}</div>
+      <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
+    </div>
+    <button class="fav-btn">${app.favorite ? "⭐" : "☆"}</button>
+  </div>
+  <div class="actions">
+    <button class="btn secondary" data-open>Open</button>
+    <button class="btn" data-edit>Edit</button>
+  </div>
+`;
+
+c.querySelector('.fav-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  apps[app.originalIndex].favorite = !apps[app.originalIndex].favorite;
+  save();
+  render(search.value.trim().toLowerCase());
+});
 
     c.querySelector('[data-open]').addEventListener('click', e=>{
       e.stopPropagation();
@@ -119,7 +131,7 @@
       grid.insertBefore(dragging, after? c.nextSibling : c);
     });
     c.addEventListener('drop', ()=>{ syncOrderFromDOM(); });
-    
+
     // Click opens too
     c.addEventListener('click', ()=> window.open(app.url,'_blank','noopener'));
 
@@ -166,7 +178,8 @@
       name: nameInput.value.trim(),
       url: urlInput.value.trim(),
       icon: iconInput.value.trim() || null,
-      category: categoryInput.value || "General"
+      category: categoryInput.value.trim() || "General",
+      favorite: apps[editingIndex]?.favorite || false // keep favorite status
     };
     if(!data.name || !data.url) return;
     try{ new URL(data.url); }catch{ alert('Please enter a valid URL starting with http(s)://'); return; }
@@ -194,6 +207,25 @@
     a.click();
     URL.revokeObjectURL(a.href);
   });
+
+  // Favorites button
+const favoritesBtn = document.getElementById('favoritesBtn');
+favoritesBtn.addEventListener('click', () => {
+    renderFavorites();
+});
+
+function renderFavorites() {
+  grid.innerHTML = '';
+  const favs = apps
+    .map((a, i) => ({ ...a, originalIndex: i }))
+    .filter(a => a.favorite);
+
+  favs.forEach(app => grid.appendChild(card(app)));
+  empty.style.display = favs.length ? 'none' : 'block';
+  countTag.textContent = `${favs.length} favorite${favs.length===1?'':'s'}`;
+}
+
+
 
   importFile.addEventListener('change', async (e)=>{
     const file = e.target.files[0]; if(!file) return;
@@ -233,5 +265,3 @@ menuBtn.addEventListener('click', () => {
   footer.classList.toggle('shifted');
 });
 })();
-
-
