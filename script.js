@@ -86,58 +86,44 @@
     const c = document.createElement('div');
     c.className = 'card';
     c.draggable = true;
-    c.dataset.index = app.i;
+    c.dataset.index = app.i ?? app.originalIndex; // support both main + favorites view
 
     c.innerHTML = `
-  <div class="app-top">
-    <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
-    <div style="min-width:0">
-      <div class="app-name">${escapeHtml(app.name)}</div>
-      <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
-    </div>
-    <button class="fav-btn">${app.favorite ? "⭐" : "☆"}</button>
-  </div>
-  <div class="actions">
-    <button class="btn secondary" data-open>Open</button>
-    <button class="btn" data-edit>Edit</button>
-  </div>
-`;
+      <div class="app-top">
+        <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
+        <div style="min-width:0">
+          <div class="app-name">${escapeHtml(app.name)}</div>
+          <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
+        </div>
+        <button class="fav-btn" title="Toggle Favorite">${app.favorite ? "⭐" : "☆"}</button>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" data-open>Open</button>
+        <button class="btn" data-edit>Edit</button>
+      </div>
+    `;
 
-c.querySelector('.fav-btn').addEventListener('click', e => {
-  e.stopPropagation();
-  apps[app.originalIndex].favorite = !apps[app.originalIndex].favorite;
-  save();
-  render(search.value.trim().toLowerCase());
-});
+    // ⭐ Favorite toggle
+    c.querySelector('.fav-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        const index = app.i ?? app.originalIndex;
+        apps[index].favorite = !apps[index].favorite;
+        save();
+        render(search.value.trim().toLowerCase()); // refresh the main view
+    });
 
+    // Existing open + edit
     c.querySelector('[data-open]').addEventListener('click', e=>{
-      e.stopPropagation();
-      window.open(app.url, '_blank', 'noopener');
+        e.stopPropagation();
+        window.open(app.url, '_blank', 'noopener');
     });
     c.querySelector('[data-edit]').addEventListener('click', e=>{
-      e.stopPropagation();
-      openEditor(app.i);
+        e.stopPropagation();
+        openEditor(app.i ?? app.originalIndex);
     });
-
-        // Drag & drop reordering
-    c.addEventListener('dragstart', e=>{ c.classList.add('dragging'); e.dataTransfer.setData('text/plain', app.i); });
-    c.addEventListener('dragend', ()=> c.classList.remove('dragging'));
-    c.addEventListener('dragover', e=>{
-      e.preventDefault();
-      const dragging = document.querySelector('.card.dragging');
-      if(!dragging||dragging===c) return;
-      const rect=c.getBoundingClientRect();
-      const after = (e.clientY-rect.top) > rect.height/2;
-      grid.insertBefore(dragging, after? c.nextSibling : c);
-    });
-    c.addEventListener('drop', ()=>{ syncOrderFromDOM(); });
-
-    // Click opens too
-    c.addEventListener('click', ()=> window.open(app.url,'_blank','noopener'));
-
     return c;
-  }
-
+}
+    // Drag and drop
   function syncOrderFromDOM(){
     const indices = [...grid.querySelectorAll('.card')].map(el=> Number(el.dataset.index));
     const newOrder = indices.map(i=> apps[i]);
@@ -210,22 +196,31 @@ c.querySelector('.fav-btn').addEventListener('click', e => {
 
   // Favorites button
 const favoritesBtn = document.getElementById('favoritesBtn');
+const returnBtn = document.getElementById('returnBtn');
+
+// Show favorites
 favoritesBtn.addEventListener('click', () => {
-    renderFavorites();
+  renderFavorites();
+  returnBtn.style.display = 'inline-block'; // show return button
+});
+
+// Return to full list
+returnBtn.addEventListener('click', () => {
+  render(search.value.trim().toLowerCase());
+  returnBtn.style.display = 'none'; // hide again
 });
 
 function renderFavorites() {
-  grid.innerHTML = '';
-  const favs = apps
-    .map((a, i) => ({ ...a, originalIndex: i }))
-    .filter(a => a.favorite);
+    grid.innerHTML = '';
+    const favs = apps
+        .map((a, i) => ({ ...a, originalIndex: i }))
+        .filter(a => a.favorite);
 
-  favs.forEach(app => grid.appendChild(card(app)));
-  empty.style.display = favs.length ? 'none' : 'block';
-  countTag.textContent = `${favs.length} favorite${favs.length===1?'':'s'}`;
+    favs.forEach(app => grid.appendChild(card(app)));
+
+    empty.style.display = favs.length ? 'none' : 'block';
+    countTag.textContent = `${favs.length} favorite${favs.length===1?'':'s'}`;
 }
-
-
 
   importFile.addEventListener('change', async (e)=>{
     const file = e.target.files[0]; if(!file) return;

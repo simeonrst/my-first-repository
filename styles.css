@@ -211,7 +211,7 @@ main.shifted,
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   color: gold;
 }
 
@@ -243,6 +243,11 @@ main.shifted,
 .sidebar > .sidebar-btn {
   margin-top: 10px;
 }
+
+#returnBtn {
+  margin-left: 10px; /* keeps spacing consistent */
+}
+
 
 
 
