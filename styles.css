@@ -151,7 +151,7 @@ dialog::backdrop{background:rgba(2,6,23,.6)}
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 40px; /* adjust this so icons align with categories */
+  padding-top: 20px; /* adjust this so icons align with categories */
   gap: 14px;
   z-index: 20;
   overflow: hidden;        /* hides text when collapsed */
@@ -221,7 +221,7 @@ main.shifted,
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 100px; /* push other buttons below menu */
+  margin-top: 10px; /* push other buttons below menu */
 }
 
 /* Text labels hidden by default */
@@ -247,6 +247,18 @@ main.shifted,
 #returnBtn {
   margin-left: 10px; /* keeps spacing consistent */
 }
+
+.pinned-divider {
+  border: none;
+  border-top: 1px dashed #ccc;
+  margin: 6px 0;
+}
+
+.card .btn {
+  padding: 4px 15px;
+  font-size: 12px;
+}
+
 
 
 

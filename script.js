@@ -20,9 +20,16 @@
   const STORAGE_KEY = 'apphub.v1.apps';
   let apps = load();
 
-  apps.forEach(a => { if(a.favorite === undefined) a.favorite = false; });
-  
-  let editingIndex = null;
+// Ensure favorite and pinned properties exist
+
+  apps = apps.map(a => ({
+  ...a,
+  favorite: a.favorite ?? false,
+  pinned: a.pinned ?? false
+}));
+
+apps.forEach(a => console.log(a.name, a.favorite, a.pinned));
+render();
 
   function load(){
     try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -61,23 +68,41 @@
       grouped[cat].push(app);
     });
 
-    // Render each category vertically
-    for(const category in grouped){
-      const categoryWrapper = document.createElement('div');
-      categoryWrapper.className = 'category-column';
+    //  ender each category vertically
+for (const category in grouped) {
+  const categoryWrapper = document.createElement('div');
+  categoryWrapper.className = 'category-column';
 
-      const header = document.createElement('div');
-      header.className = 'category-header';
-      header.textContent = category;
-      categoryWrapper.appendChild(header);
+  const header = document.createElement('div');
+  header.className = 'category-header';
+  header.textContent = category;
+  categoryWrapper.appendChild(header);
 
-      grouped[category].forEach(app => {
-        const c = card(app);
-        categoryWrapper.appendChild(c);
-      });
+  // Separate pinned and unpinned
+  const pinnedApps = grouped[category].filter(a => a.pinned);
+  const unpinnedApps = grouped[category].filter(a => !a.pinned);
 
-      grid.appendChild(categoryWrapper);
-    }
+  // Render pinned first
+  pinnedApps.forEach(app => {
+    const c = card(app);
+    categoryWrapper.appendChild(c);
+  });
+
+  // Add a divider if pinned exists
+  if (pinnedApps.length > 0 && unpinnedApps.length > 0) {
+    const divider = document.createElement('hr');
+    divider.className = 'pinned-divider';
+    categoryWrapper.appendChild(divider);
+  }
+
+  // Then render unpinned
+  unpinnedApps.forEach(app => {
+    const c = card(app);
+    categoryWrapper.appendChild(c);
+  });
+
+  grid.appendChild(categoryWrapper);
+}
 
     countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
   }
@@ -86,22 +111,23 @@
     const c = document.createElement('div');
     c.className = 'card';
     c.draggable = true;
-    c.dataset.index = app.i ?? app.originalIndex; // support both main + favorites view
+    c.dataset.index = (app.i ?? app.originalIndex ?? 0);
 
     c.innerHTML = `
-      <div class="app-top">
-        <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
-        <div style="min-width:0">
-          <div class="app-name">${escapeHtml(app.name)}</div>
-          <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
-        </div>
-        <button class="fav-btn" title="Toggle Favorite">${app.favorite ? "⭐" : "☆"}</button>
-      </div>
-      <div class="actions">
-        <button class="btn secondary" data-open>Open</button>
-        <button class="btn" data-edit>Edit</button>
-      </div>
-    `;
+  <div class="app-top">
+    <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
+    <div style="min-width:0">
+      <div class="app-name">${escapeHtml(app.name)}</div>
+      <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
+    </div>
+    <button class="pin-btn" title="Pin to Category">${app.pinned ? "📌" : "📍"}</button>
+  </div>
+  <div class="actions">
+    <button class="btn secondary" data-open>Open</button>
+    <button class="btn" data-edit>Edit</button>
+    <button class="fav-btn" title="Toggle Favorite">${app.favorite ? "⭐" : "☆"}</button>
+  </div>
+ `;
 
     // ⭐ Favorite toggle
     c.querySelector('.fav-btn').addEventListener('click', e => {
@@ -111,6 +137,15 @@
         save();
         render(search.value.trim().toLowerCase()); // refresh the main view
     });
+
+    // 📌 Pin toggle
+c.querySelector('.pin-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  const index = app.i ?? app.originalIndex;
+  apps[index].pinned = !apps[index].pinned;
+  save();
+  render(search.value.trim().toLowerCase()); // re-render to reorder
+});
 
     // Existing open + edit
     c.querySelector('[data-open]').addEventListener('click', e=>{
@@ -161,12 +196,13 @@
   form.addEventListener('submit', e=>{
     e.preventDefault();
     const data = {
-      name: nameInput.value.trim(),
-      url: urlInput.value.trim(),
-      icon: iconInput.value.trim() || null,
-      category: categoryInput.value.trim() || "General",
-      favorite: apps[editingIndex]?.favorite || false // keep favorite status
-    };
+  name: nameInput.value.trim(),
+  url: urlInput.value.trim(),
+  icon: iconInput.value.trim() || null,
+  category: categoryInput.value.trim() || "General",
+  favorite: apps[editingIndex]?.favorite || false,
+  pinned: apps[editingIndex]?.pinned || false // NEW
+  };
     if(!data.name || !data.url) return;
     try{ new URL(data.url); }catch{ alert('Please enter a valid URL starting with http(s)://'); return; }
     if(editingIndex===null){ apps.push(data); }
@@ -207,20 +243,25 @@ favoritesBtn.addEventListener('click', () => {
 // Return to full list
 returnBtn.addEventListener('click', () => {
   render(search.value.trim().toLowerCase());
-  returnBtn.style.display = 'none'; // hide again
+  returnBtn.style.display = 'none';
 });
 
 function renderFavorites() {
-    grid.innerHTML = '';
-    const favs = apps
-        .map((a, i) => ({ ...a, originalIndex: i }))
-        .filter(a => a.favorite);
+  grid.innerHTML = '';
 
-    favs.forEach(app => grid.appendChild(card(app)));
+  // map apps with originalIndex for event listeners
+  const favs = apps
+    .map((a, i) => ({ ...a, originalIndex: i }))
+    .filter(a => a.favorite);
 
-    empty.style.display = favs.length ? 'none' : 'block';
-    countTag.textContent = `${favs.length} favorite${favs.length===1?'':'s'}`;
+  favs.forEach(app => grid.appendChild(card(app))); // use card(app) for each
+
+  empty.style.display = favs.length ? 'none' : 'block';
+  countTag.textContent = `${favs.length} favorite${favs.length === 1 ? '' : 's'}`;
+
+  returnBtn.style.display = 'inline-block'; // show return button
 }
+
 
   importFile.addEventListener('change', async (e)=>{
     const file = e.target.files[0]; if(!file) return;
