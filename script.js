@@ -18,7 +18,20 @@
   const categoryInput = $('#category');
 
   const STORAGE_KEY = 'apphub.v1.apps';
+  const CATEGORY_KEY = 'apphub.v1.categories';
   let apps = load();
+
+  //Category storage
+  function loadCategories() {
+  try { return JSON.parse(localStorage.getItem(CATEGORY_KEY)) || ["General", "Work", "Social", "Tools"]; }
+  catch { return ["General", "Work", "Social", "Tools"]; }
+}
+
+function saveCategories(categories) {
+  localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories));
+}
+
+let categories = loadCategories();
 
 // Ensure favorite and pinned properties exist
 
@@ -68,7 +81,7 @@ render();
       grouped[cat].push(app);
     });
 
-    //  ender each category vertically
+    //  Render each category vertically
 for (const category in grouped) {
   const categoryWrapper = document.createElement('div');
   categoryWrapper.className = 'category-column';
@@ -165,7 +178,19 @@ c.querySelector('.pin-btn').addEventListener('click', e => {
     if(newOrder.length === apps.length){ apps = newOrder; save(); render(search.value.trim().toLowerCase()); }
   }
 
+  function populateCategorySelect() {
+  categoryInput.innerHTML = "";
+  categories.forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    categoryInput.appendChild(opt);
+  });
+}
+
   function openEditor(index=null){
+  populateCategorySelect(); // Refresh categories before opening editor
+
     editingIndex = index;
     if(index===null){
       modalTitle.textContent = 'Add App';
@@ -220,6 +245,70 @@ c.querySelector('.pin-btn').addEventListener('click', e => {
   });
 
   search.addEventListener('input', ()=> render(search.value.trim().toLowerCase()));
+
+  // Add Category button
+const addCategoryBtn = document.createElement("button");
+addCategoryBtn.textContent = "+ Add Category";
+addCategoryBtn.className = "btn secondary";
+
+// Delete Category button
+const deleteCategoryBtn = document.createElement("button");
+deleteCategoryBtn.textContent = "🗑 Delete Category";
+deleteCategoryBtn.className = "btn danger";
+
+// Put them together inside a wrapper so they sit side by side
+const categoryActions = document.createElement("div");
+categoryActions.style.display = "flex";
+categoryActions.style.gap = "8px"; // space between buttons
+categoryActions.appendChild(addCategoryBtn);
+categoryActions.appendChild(deleteCategoryBtn);
+
+// Add a class for CSS styling
+categoryActions.classList.add("category-actions");
+
+// Make the parent of the dropdown a flex container
+categoryInput.parentNode.style.display = "flex";
+categoryInput.parentNode.style.alignItems = "center";
+categoryInput.parentNode.style.gap = "8px"; // space between dropdown and buttons
+
+// Append the buttons wrapper
+categoryInput.parentNode.appendChild(categoryActions);
+
+// Add category logic
+addCategoryBtn.addEventListener("click", () => {
+  const newCat = prompt("Enter new category name:");
+  if (newCat && !categories.includes(newCat)) {
+    categories.push(newCat);
+    saveCategories(categories);
+    populateCategorySelect();
+    categoryInput.value = newCat;
+  }
+});
+
+// Delete category logic
+deleteCategoryBtn.addEventListener("click", () => {
+  const catToDelete = categoryInput.value;
+  if (catToDelete === "General") {
+    alert("You cannot delete the default 'General' category.");
+    return;
+  }
+
+  if (confirm(`Delete category "${catToDelete}"? Apps in this category will be moved to 'General'.`)) {
+    categories = categories.filter(c => c !== catToDelete);
+    saveCategories(categories);
+
+    apps.forEach(a => {
+      if (a.category === catToDelete) {
+        a.category = "General";
+      }
+    });
+    save();
+
+    populateCategorySelect();
+    categoryInput.value = "General";
+    render();
+  }
+});
 
   exportBtn.addEventListener('click', ()=>{
     const blob = new Blob([JSON.stringify(apps,null,2)], {type:'application/json'});
