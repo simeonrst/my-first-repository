@@ -212,10 +212,10 @@ main.shifted,
   background: none;
   border: none;
   cursor: pointer;
+  align-items: center;
   font-size: 18px;
   color: gold;
 }
-
 
 /* Group for the other buttons */
 .sidebar-buttons {
@@ -267,7 +267,60 @@ main.shifted,
   margin-bottom: 2px;
 }
 
+/* Light Theme */
+body.light {
+  background: #fefeff;
+  color: #1d2028;
+}
 
+body.light .card {
+  background: #eae8e0;
+  border: 1px solid #1d2028;
+}
+
+/* Dark Theme */
+body.dark {
+  background: #111827;
+  color: #f9fafb;
+}
+
+body.dark .card {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+/* Toolbar & Sidebar adjustments */
+body.dark header,
+body.dark .sidebar {
+  background: #1f2937;
+  border: 1px solid #505a6a;
+}
+
+body.light header,
+body.light .sidebar {
+  background: #eae8e0;
+  border: 1px solid #1d2028;
+}
+
+body.dark .btn {
+  background: #374151;
+  color: #f9fafb;
+}
+
+body.light .btn {
+  background: #fefeff;
+  color: #111827;
+}
+
+/* Theme toggle button animation */
+#themeToggle {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+#themeToggle.animate {
+  transform: rotate(360deg) scale(1.2);
+  opacity: 0.7;
+}
 
 
 

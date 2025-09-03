@@ -390,3 +390,33 @@ menuBtn.addEventListener('click', () => {
   footer.classList.toggle('shifted');
 });
 })();
+
+// THEME TOGGLE
+const themeToggle = document.getElementById("themeToggle");
+
+// Load theme from localStorage or default to light
+let currentTheme = localStorage.getItem("theme") || "light";
+document.body.classList.add(currentTheme);
+themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+
+themeToggle.addEventListener("click", () => {
+  // Add animation
+  themeToggle.classList.add("animate");
+
+  setTimeout(() => {
+    themeToggle.classList.remove("animate");
+
+    // Switch theme
+    document.body.classList.remove(currentTheme);
+    currentTheme = currentTheme === "dark" ? "light" : "dark";
+    document.body.classList.add(currentTheme);
+
+    // Save preference
+    localStorage.setItem("theme", currentTheme);
+
+    // Update button icon
+    themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+  }, 400); // Match CSS duration
+});
+
+
