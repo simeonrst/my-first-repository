@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog & News</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light">
+  <header>
+    <nav class="navbar">
+      <a href="index.html">🏠 Home</a>
+      <a href="blog.html" class="active">📰 Blog</a>
+      <a href="forecast.html">🌦 Forecast</a>
+    </nav>
+  </header>
+
+  <!-- Sidebar placeholder -->
+<div id="sidebarContainer"></div>
+
+<script>
+fetch('sidebar.html')
+  .then(response => response.text())
+  .then(html => {
+    document.getElementById('sidebarContainer').innerHTML = html;
+
+    // Attach theme toggle after sidebar loads
+    const themeToggle = document.getElementById("themeToggle");
+    // ...theme toggle code here...
+  });
+</script>
+
+  <main>
+    <h1 class="page-title">Latest News & Updates</h1>
+
+    <section class="blog-container">
+      <!-- Example Post -->
+      <article class="blog-post">
+        <h2 class="post-title">Welcome to Our New Blog!</h2>
+        <p class="post-date">September 4, 2025</p>
+        <p class="post-content">
+          We’re excited to launch our blog section 🎉 Here we’ll share updates, new features, and tips.
+          Stay tuned for more content coming soon!
+        </p>
+        <a href="#" class="read-more">Read More →</a>
+      </article>
+
+      <article class="blog-post">
+        <h2 class="post-title">Theme Toggle Feature</h2>
+        <p class="post-date">August 30, 2025</p>
+        <p class="post-content">
+          You can now switch between Light 🌞 and Dark 🌙 themes. Your preference is saved automatically
+          for your next visit.
+        </p>
+        <a href="#" class="read-more">Read More →</a>
+      </article>
+    </section>
+  </main>
+
+  <main>
+  <h1 class="page-title">Latest News & Updates</h1>
+
+  <!-- Forecast Widget -->
+  <div id="weatherWidget" class="card">
+    <p id="weather">Loading forecast...</p>
+  </div>
+
+  <section class="blog-container">
+    <!-- Blog posts here -->
+  </section>
+</main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -26,32 +26,20 @@
     </div>
   </header>
 
-  <div class="sidebar">
-  <!-- Menu button stays at the top -->
-  <button class="sidebar-btn" id="menuBtn" title="Menu">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor">
-      <path d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>
-    </svg>
-  </button>
+  <!-- Sidebar placeholder -->
+<div id="sidebarContainer"></div>
 
-  <button class="sidebar-btn" id="favoritesBtn" title="Favorites">⭐</button>
-  <button class="sidebar-btn" id="themeToggle" title="Toggle Theme">🌙</button>
+<script>
+fetch('sidebar.html')
+  .then(response => response.text())
+  .then(html => {
+    document.getElementById('sidebarContainer').innerHTML = html;
 
-  <!-- Group other buttons below -->
-  <div class="sidebar-buttons">
-    <button class="sidebar-btn" title="Home">🏠</button>
-    <button class="sidebar-btn" title="Add App">➕</button>
-    <button class="sidebar-btn" title="Settings">⚙️</button>
-  </div>
-</div>
-
-<!-- Expanded panel (hidden by default) -->
-<div class="sidebar-expand" id="sidebarExpand">
-  <div class="expand-content">
-    <p>Extra menu content goes here...</p>
-    <p>Links / Shortcuts / Settings</p>
-  </div>
-</div>
+    // Attach theme toggle after sidebar loads
+    const themeToggle = document.getElementById("themeToggle");
+    // ...theme toggle code here...
+  });
+</script>
 
   <main>
     <div id="grid" class="grid"></div>
@@ -59,6 +47,14 @@
       No apps yet. Click <b>+ Add App</b> to get started.
     </div>
   </main>
+
+<!-- Compact Weather Bar -->
+  <div class="weather-container">
+<div id="weatherBar" class="weather-bar" onclick="goToForecastPage()">
+  <span id="weatherIcon">🌤️</span>
+  <span id="weatherTemp">--°C</span>
+  </div>
+</div>
 
   <div class="footer">Data is stored locally in your browser.</div>
 

@@ -21,28 +21,26 @@
   const CATEGORY_KEY = 'apphub.v1.categories';
   let apps = load();
 
-  //Category storage
+  // Category storage
   function loadCategories() {
-  try { return JSON.parse(localStorage.getItem(CATEGORY_KEY)) || ["General", "Work", "Social", "Tools"]; }
-  catch { return ["General", "Work", "Social", "Tools"]; }
-}
+    try { return JSON.parse(localStorage.getItem(CATEGORY_KEY)) || ["General", "Work", "Social", "Tools"]; }
+    catch { return ["General", "Work", "Social", "Tools"]; }
+  }
 
-function saveCategories(categories) {
-  localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories));
-}
+  function saveCategories(categories) {
+    localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories));
+  }
 
-let categories = loadCategories();
+  let categories = loadCategories();
 
-// Ensure favorite and pinned properties exist
-
+  // Ensure favorite and pinned properties exist
   apps = apps.map(a => ({
-  ...a,
-  favorite: a.favorite ?? false,
-  pinned: a.pinned ?? false
-}));
+    ...a,
+    favorite: a.favorite ?? false,
+    pinned: a.pinned ?? false
+  }));
 
-apps.forEach(a => console.log(a.name, a.favorite, a.pinned));
-render();
+  render();
 
   function load(){
     try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -81,41 +79,41 @@ render();
       grouped[cat].push(app);
     });
 
-    //  Render each category vertically
-for (const category in grouped) {
-  const categoryWrapper = document.createElement('div');
-  categoryWrapper.className = 'category-column';
+    // Render each category vertically
+    for (const category in grouped) {
+      const categoryWrapper = document.createElement('div');
+      categoryWrapper.className = 'category-column';
 
-  const header = document.createElement('div');
-  header.className = 'category-header';
-  header.textContent = category;
-  categoryWrapper.appendChild(header);
+      const header = document.createElement('div');
+      header.className = 'category-header';
+      header.textContent = category;
+      categoryWrapper.appendChild(header);
 
-  // Separate pinned and unpinned
-  const pinnedApps = grouped[category].filter(a => a.pinned);
-  const unpinnedApps = grouped[category].filter(a => !a.pinned);
+      // Separate pinned and unpinned
+      const pinnedApps = grouped[category].filter(a => a.pinned);
+      const unpinnedApps = grouped[category].filter(a => !a.pinned);
 
-  // Render pinned first
-  pinnedApps.forEach(app => {
-    const c = card(app);
-    categoryWrapper.appendChild(c);
-  });
+      // Render pinned first
+      pinnedApps.forEach(app => {
+        const c = card(app);
+        categoryWrapper.appendChild(c);
+      });
 
-  // Add a divider if pinned exists
-  if (pinnedApps.length > 0 && unpinnedApps.length > 0) {
-    const divider = document.createElement('hr');
-    divider.className = 'pinned-divider';
-    categoryWrapper.appendChild(divider);
-  }
+      // Add a divider if pinned exists
+      if (pinnedApps.length > 0 && unpinnedApps.length > 0) {
+        const divider = document.createElement('hr');
+        divider.className = 'pinned-divider';
+        categoryWrapper.appendChild(divider);
+      }
 
-  // Then render unpinned
-  unpinnedApps.forEach(app => {
-    const c = card(app);
-    categoryWrapper.appendChild(c);
-  });
+      // Then render unpinned
+      unpinnedApps.forEach(app => {
+        const c = card(app);
+        categoryWrapper.appendChild(c);
+      });
 
-  grid.appendChild(categoryWrapper);
-}
+      grid.appendChild(categoryWrapper);
+    }
 
     countTag.textContent = `${apps.length} ${apps.length===1?'app':'apps'}`;
   }
@@ -127,51 +125,52 @@ for (const category in grouped) {
     c.dataset.index = (app.i ?? app.originalIndex ?? 0);
 
     c.innerHTML = `
-  <div class="app-top">
-    <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
-    <div style="min-width:0">
-      <div class="app-name">${escapeHtml(app.name)}</div>
-      <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
-    </div>
-    <button class="pin-btn" title="Pin to Category">${app.pinned ? "📌" : "📍"}</button>
-  </div>
-  <div class="actions">
-    <button class="btn secondary" data-open>Open</button>
-    <button class="btn" data-edit>Edit</button>
-    <button class="fav-btn" title="Toggle Favorite">${app.favorite ? "⭐" : "☆"}</button>
-  </div>
- `;
+      <div class="app-top">
+        <img alt="" src="${faviconFor(app.url, app.icon)}" onerror="this.style.visibility='hidden'" />
+        <div style="min-width:0">
+          <div class="app-name">${escapeHtml(app.name)}</div>
+          <div class="app-url" title="${app.url}">${escapeHtml(app.url)}</div>
+        </div>
+        <button class="pin-btn" title="Pin to Category">${app.pinned ? "📌" : "📍"}</button>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" data-open>Open</button>
+        <button class="btn" data-edit>Edit</button>
+        <button class="fav-btn" title="Toggle Favorite">${app.favorite ? "⭐" : "☆"}</button>
+      </div>
+    `;
 
     // ⭐ Favorite toggle
     c.querySelector('.fav-btn').addEventListener('click', e => {
-        e.stopPropagation();
-        const index = app.i ?? app.originalIndex;
-        apps[index].favorite = !apps[index].favorite;
-        save();
-        render(search.value.trim().toLowerCase()); // refresh the main view
+      e.stopPropagation();
+      const index = app.i ?? app.originalIndex;
+      apps[index].favorite = !apps[index].favorite;
+      save();
+      render(search.value.trim().toLowerCase());
     });
 
     // 📌 Pin toggle
-c.querySelector('.pin-btn').addEventListener('click', e => {
-  e.stopPropagation();
-  const index = app.i ?? app.originalIndex;
-  apps[index].pinned = !apps[index].pinned;
-  save();
-  render(search.value.trim().toLowerCase()); // re-render to reorder
-});
+    c.querySelector('.pin-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      const index = app.i ?? app.originalIndex;
+      apps[index].pinned = !apps[index].pinned;
+      save();
+      render(search.value.trim().toLowerCase());
+    });
 
-    // Existing open + edit
+    // Open + Edit
     c.querySelector('[data-open]').addEventListener('click', e=>{
-        e.stopPropagation();
-        window.open(app.url, '_blank', 'noopener');
+      e.stopPropagation();
+      window.open(app.url, '_blank', 'noopener');
     });
     c.querySelector('[data-edit]').addEventListener('click', e=>{
-        e.stopPropagation();
-        openEditor(app.i ?? app.originalIndex);
+      e.stopPropagation();
+      openEditor(app.i ?? app.originalIndex);
     });
     return c;
-}
-    // Drag and drop
+  }
+
+  // Drag and drop order sync
   function syncOrderFromDOM(){
     const indices = [...grid.querySelectorAll('.card')].map(el=> Number(el.dataset.index));
     const newOrder = indices.map(i=> apps[i]);
@@ -179,18 +178,17 @@ c.querySelector('.pin-btn').addEventListener('click', e => {
   }
 
   function populateCategorySelect() {
-  categoryInput.innerHTML = "";
-  categories.forEach(cat => {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.textContent = cat;
-    categoryInput.appendChild(opt);
-  });
-}
+    categoryInput.innerHTML = "";
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categoryInput.appendChild(opt);
+    });
+  }
 
   function openEditor(index=null){
-  populateCategorySelect(); // Refresh categories before opening editor
-
+    populateCategorySelect();
     editingIndex = index;
     if(index===null){
       modalTitle.textContent = 'Add App';
@@ -213,7 +211,7 @@ c.querySelector('.pin-btn').addEventListener('click', e => {
   }
 
   function escapeHtml(s){ return s.replace(/[&<>"']/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])); }
-  
+
   // Events
   addBtn.addEventListener('click', ()=> openEditor(null));
   closeDialog.addEventListener('click', ()=> dialog.close());
@@ -221,13 +219,13 @@ c.querySelector('.pin-btn').addEventListener('click', e => {
   form.addEventListener('submit', e=>{
     e.preventDefault();
     const data = {
-  name: nameInput.value.trim(),
-  url: urlInput.value.trim(),
-  icon: iconInput.value.trim() || null,
-  category: categoryInput.value.trim() || "General",
-  favorite: apps[editingIndex]?.favorite || false,
-  pinned: apps[editingIndex]?.pinned || false // NEW
-  };
+      name: nameInput.value.trim(),
+      url: urlInput.value.trim(),
+      icon: iconInput.value.trim() || null,
+      category: categoryInput.value.trim() || "General",
+      favorite: apps[editingIndex]?.favorite || false,
+      pinned: apps[editingIndex]?.pinned || false
+    };
     if(!data.name || !data.url) return;
     try{ new URL(data.url); }catch{ alert('Please enter a valid URL starting with http(s)://'); return; }
     if(editingIndex===null){ apps.push(data); }
@@ -246,69 +244,62 @@ c.querySelector('.pin-btn').addEventListener('click', e => {
 
   search.addEventListener('input', ()=> render(search.value.trim().toLowerCase()));
 
-  // Add Category button
-const addCategoryBtn = document.createElement("button");
-addCategoryBtn.textContent = "+ Add Category";
-addCategoryBtn.className = "btn secondary";
+  // Category management
+  const addCategoryBtn = document.createElement("button");
+  addCategoryBtn.textContent = "+ Add Category";
+  addCategoryBtn.className = "btn secondary";
 
-// Delete Category button
-const deleteCategoryBtn = document.createElement("button");
-deleteCategoryBtn.textContent = "🗑 Delete Category";
-deleteCategoryBtn.className = "btn danger";
+  const deleteCategoryBtn = document.createElement("button");
+  deleteCategoryBtn.textContent = "🗑 Delete Category";
+  deleteCategoryBtn.className = "btn danger";
 
-// Put them together inside a wrapper so they sit side by side
-const categoryActions = document.createElement("div");
-categoryActions.style.display = "flex";
-categoryActions.style.gap = "8px"; // space between buttons
-categoryActions.appendChild(addCategoryBtn);
-categoryActions.appendChild(deleteCategoryBtn);
+  const categoryActions = document.createElement("div");
+  categoryActions.style.display = "flex";
+  categoryActions.style.gap = "8px";
+  categoryActions.appendChild(addCategoryBtn);
+  categoryActions.appendChild(deleteCategoryBtn);
 
-// Add a class for CSS styling
-categoryActions.classList.add("category-actions");
+  categoryActions.classList.add("category-actions");
 
-// Make the parent of the dropdown a flex container
-categoryInput.parentNode.style.display = "flex";
-categoryInput.parentNode.style.alignItems = "center";
-categoryInput.parentNode.style.gap = "8px"; // space between dropdown and buttons
+  categoryInput.parentNode.style.display = "flex";
+  categoryInput.parentNode.style.alignItems = "center";
+  categoryInput.parentNode.style.gap = "8px";
 
-// Append the buttons wrapper
-categoryInput.parentNode.appendChild(categoryActions);
+  categoryInput.parentNode.appendChild(categoryActions);
 
-// Add category logic
-addCategoryBtn.addEventListener("click", () => {
-  const newCat = prompt("Enter new category name:");
-  if (newCat && !categories.includes(newCat)) {
-    categories.push(newCat);
-    saveCategories(categories);
-    populateCategorySelect();
-    categoryInput.value = newCat;
-  }
-});
+  addCategoryBtn.addEventListener("click", () => {
+    const newCat = prompt("Enter new category name:");
+    if (newCat && !categories.includes(newCat)) {
+      categories.push(newCat);
+      saveCategories(categories);
+      populateCategorySelect();
+      categoryInput.value = newCat;
+    }
+  });
 
-// Delete category logic
-deleteCategoryBtn.addEventListener("click", () => {
-  const catToDelete = categoryInput.value;
-  if (catToDelete === "General") {
-    alert("You cannot delete the default 'General' category.");
-    return;
-  }
+  deleteCategoryBtn.addEventListener("click", () => {
+    const catToDelete = categoryInput.value;
+    if (catToDelete === "General") {
+      alert("You cannot delete the default 'General' category.");
+      return;
+    }
 
-  if (confirm(`Delete category "${catToDelete}"? Apps in this category will be moved to 'General'.`)) {
-    categories = categories.filter(c => c !== catToDelete);
-    saveCategories(categories);
+    if (confirm(`Delete category "${catToDelete}"? Apps in this category will be moved to 'General'.`)) {
+      categories = categories.filter(c => c !== catToDelete);
+      saveCategories(categories);
 
-    apps.forEach(a => {
-      if (a.category === catToDelete) {
-        a.category = "General";
-      }
-    });
-    save();
+      apps.forEach(a => {
+        if (a.category === catToDelete) {
+          a.category = "General";
+        }
+      });
+      save();
 
-    populateCategorySelect();
-    categoryInput.value = "General";
-    render();
-  }
-});
+      populateCategorySelect();
+      categoryInput.value = "General";
+      render();
+    }
+  });
 
   exportBtn.addEventListener('click', ()=>{
     const blob = new Blob([JSON.stringify(apps,null,2)], {type:'application/json'});
@@ -319,38 +310,37 @@ deleteCategoryBtn.addEventListener("click", () => {
     URL.revokeObjectURL(a.href);
   });
 
-  // Favorites button
-const favoritesBtn = document.getElementById('favoritesBtn');
-const returnBtn = document.getElementById('returnBtn');
+  const favoritesBtn = document.getElementById('favoritesBtn');
+  const returnBtn = document.getElementById('returnBtn');
 
-// Show favorites
-favoritesBtn.addEventListener('click', () => {
-  renderFavorites();
-  returnBtn.style.display = 'inline-block'; // show return button
-});
+  if (favoritesBtn) {
+    favoritesBtn.addEventListener('click', () => {
+      renderFavorites();
+      returnBtn.style.display = 'inline-block';
+    });
+  }
 
-// Return to full list
-returnBtn.addEventListener('click', () => {
-  render(search.value.trim().toLowerCase());
-  returnBtn.style.display = 'none';
-});
+  if (returnBtn) {
+    returnBtn.addEventListener('click', () => {
+      render(search.value.trim().toLowerCase());
+      returnBtn.style.display = 'none';
+    });
+  }
 
-function renderFavorites() {
+  // expose globally so sidebar can use it
+window.renderFavorites = function() {
   grid.innerHTML = '';
-
-  // map apps with originalIndex for event listeners
   const favs = apps
     .map((a, i) => ({ ...a, originalIndex: i }))
     .filter(a => a.favorite);
 
-  favs.forEach(app => grid.appendChild(card(app))); // use card(app) for each
+  favs.forEach(app => grid.appendChild(card(app)));
 
   empty.style.display = favs.length ? 'none' : 'block';
   countTag.textContent = `${favs.length} favorite${favs.length === 1 ? '' : 's'}`;
 
-  returnBtn.style.display = 'inline-block'; // show return button
-}
-
+  returnBtn.style.display = 'inline-block';
+};
 
   importFile.addEventListener('change', async (e)=>{
     const file = e.target.files[0]; if(!file) return;
@@ -366,7 +356,7 @@ function renderFavorites() {
     finally{ importFile.value = ''; }
   });
 
-    // Seed with a couple of examples if empty
+  // Seed with a couple of examples if empty
   if(apps.length===0){
     apps = [
       { name:'Google', url:'https://google.com', icon:null, category:'Work' },
@@ -376,47 +366,114 @@ function renderFavorites() {
   }
 
   render();
-
-  const menuBtn = document.getElementById('menuBtn');
-const sidebarExpand = document.querySelector('.sidebar-expand');
-const header = document.querySelector('header');
-const mainContent = document.querySelector('main');
-const footer = document.querySelector('.footer');
-
-menuBtn.addEventListener('click', () => {
-  sidebarExpand.classList.toggle('active');
-  header.classList.toggle('shifted');
-  mainContent.classList.toggle('shifted');
-  footer.classList.toggle('shifted');
-});
 })();
 
-// THEME TOGGLE
-const themeToggle = document.getElementById("themeToggle");
+// WEATHER BAR (independent from sidebar)
+const weatherIconEl = document.getElementById("weatherIcon");
+const weatherTempEl = document.getElementById("weatherTemp");
 
-// Load theme from localStorage or default to light
-let currentTheme = localStorage.getItem("theme") || "light";
-document.body.classList.add(currentTheme);
-themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+function fetchCurrentWeather(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const temp = Math.round(data.current_weather.temperature);
+      const code = data.current_weather.weathercode;
+      weatherTempEl.textContent = `${temp}°C`;
+      weatherIconEl.textContent = getWeatherIcon(code);
+    })
+    .catch(() => {
+      weatherTempEl.textContent = "--°C";
+      weatherIconEl.textContent = "❔";
+    });
+}
 
-themeToggle.addEventListener("click", () => {
-  // Add animation
-  themeToggle.classList.add("animate");
+function getWeatherIcon(code) {
+  if ([0].includes(code)) return "☀️";
+  if ([1, 2, 3].includes(code)) return "⛅";
+  if ([45, 48].includes(code)) return "🌫️";
+  if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return "🌧️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  return "❔";
+}
 
-  setTimeout(() => {
-    themeToggle.classList.remove("animate");
+function goToForecastPage() {
+  window.location.href = "secondpg.html";
+}
 
-    // Switch theme
-    document.body.classList.remove(currentTheme);
-    currentTheme = currentTheme === "dark" ? "light" : "dark";
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => fetchCurrentWeather(pos.coords.latitude, pos.coords.longitude),
+    () => { 
+      weatherTempEl.textContent = "--°C";
+      weatherIconEl.textContent = "❔"; 
+    }
+  );
+} else {
+  weatherTempEl.textContent = "--°C";
+  weatherIconEl.textContent = "❔";
+}
+
+// SIDEBAR LOADER
+fetch('sidebar.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('sidebarContainer').innerHTML = html;
+    initSidebar();
+  })
+  .catch(err => console.error('Failed to load sidebar:', err));
+
+function initSidebar() {
+  console.log("Sidebar initialized ✅");
+
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebarExpand = document.getElementById('sidebarExpand');
+  const favoritesBtn = document.getElementById('favoritesBtn');
+  const themeToggle = document.getElementById('themeToggle');
+
+  const header = document.querySelector('header');
+  const mainContent = document.querySelector('main');
+  const footer = document.querySelector('.footer');
+
+  // Menu toggle
+  if (menuBtn && sidebarExpand) {
+    menuBtn.addEventListener('click', () => {
+      sidebarExpand.classList.toggle('active');
+      header?.classList.toggle('shifted');
+      mainContent?.classList.toggle('shifted');
+      footer?.classList.toggle('shifted');
+    });
+  }
+
+  // Favorites button
+  if (favoritesBtn) {
+    favoritesBtn.addEventListener('click', () => {
+      if (typeof renderFavorites === "function") {
+        renderFavorites();
+      }
+    });
+  }
+
+  // Theme toggle
+  if (themeToggle) {
+    let currentTheme = localStorage.getItem("theme") || "light";
     document.body.classList.add(currentTheme);
-
-    // Save preference
-    localStorage.setItem("theme", currentTheme);
-
-    // Update button icon
     themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
-  }, 400); // Match CSS duration
-});
+
+    themeToggle.addEventListener("click", () => {
+      themeToggle.classList.add("animate");
+      setTimeout(() => {
+        themeToggle.classList.remove("animate");
+        document.body.classList.remove(currentTheme);
+        currentTheme = currentTheme === "dark" ? "light" : "dark";
+        document.body.classList.add(currentTheme);
+        localStorage.setItem("theme", currentTheme);
+        themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+      }, 400);
+    });
+  }
+}
+
 
 

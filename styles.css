@@ -140,6 +140,25 @@ dialog::backdrop{background:rgba(2,6,23,.6)}
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
 }
 
+/* Buttons inside the dialog */
+/* Primary (Save) */
+#appDialog .btn.ok {
+  background: rgb(44, 248, 44);
+  color: white;
+}
+
+/* Secondary (Close, Add Category) */
+#appDialog .btn.secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* Danger (Delete Category / Delete App) */
+#appDialog .btn.danger {
+  background: #dc2626;
+  color: white;
+}
+
 .sidebar {
   position: fixed;
   top: 20px;
@@ -312,6 +331,20 @@ body.light .btn {
   color: #111827;
 }
 
+/* Sidebar-extention theme change*/
+/* Light theme */
+.sidebar-expand {
+  background-color: #eae8e0;
+  color: #111;
+}
+
+/* Dark theme */
+body.dark .sidebar-expand {
+  background-color: #1f2937;
+  color: #eee;
+}
+
+
 /* Theme toggle button animation */
 #themeToggle {
   transition: transform 0.4s ease, opacity 0.4s ease;
@@ -322,8 +355,204 @@ body.light .btn {
   opacity: 0.7;
 }
 
+/* For the weather bar */
+.weather-bar {
+  position: relative; 
+  justify-content: center; /* horizontal center */
+  align-items: center;     /* vertical center */
+  display: inline-flex;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
+.weather-container {
+  display: flex;
+  justify-content: center;  /* horizontal */
+  align-items: center;      /* vertical */
+  height: 200px;            /* or any container height */
+}
 
+.weather-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+body.light .weather-bar {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+body.dark .weather-bar {
+  background: #374151;
+  color: #f9fafb;
+}
+
+#weatherIcon {
+  font-size: 1.3rem;
+}
+
+/*For the weather forecast */
+#weatherWidget {
+  padding: 15px;
+  border-radius: 16px;
+  margin: 20px auto;
+  max-width: 500px; /* wider for 5-day view */
+  text-align: center;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Light theme */
+body.light #weatherWidget {
+  background: #eae8e0;
+  border: 1px solid #1d2028;
+  color: #111827;
+}
+
+/* Dark theme */
+body.dark #weatherWidget {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #f9fafb;
+}
+
+.forecast-grid {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+  overflow-x: auto; /* allow scrolling on small screens */
+  scrollbar-width: thin;
+  padding-bottom: 6px;
+}
+
+.forecast-day {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.forecast-day:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+body.light .forecast-day {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+body.dark .forecast-day {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #f9fafb;
+}
+
+.forecast-day .date {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.forecast-day .icon {
+  font-size: 1.8rem;
+  margin: 6px 0;
+  transition: transform 0.3s ease;
+}
+
+.forecast-day:hover .icon {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.forecast-day .temp {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/*For page 2---------------------------*/
+
+/* Blog page styles */
+.page-title {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 2rem;
+}
+
+.blog-container {
+  display: grid;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.blog-post {
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.blog-post:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+body.light .blog-post {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+body.dark .blog-post {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #f9fafb;
+}
+
+.post-title {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.post-date {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-bottom: 12px;
+}
+
+.post-content {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.read-more {
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+body.light .read-more {
+  color: #2563eb;
+}
+
+body.dark .read-more {
+  color: #93c5fd;
+}
+
+.read-more:hover {
+  text-decoration: underline;
+}
 
 
 
