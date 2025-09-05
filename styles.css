@@ -255,8 +255,14 @@ main.shifted,
   display: inline;
 }
 
-.sidebar-btn:hover {
-  background: var(--muted);
+/* Light theme hover (already exists) */
+body.light .sidebar-btn:hover {
+  background-color: var(--muted); /* subtle darker background */
+}
+
+/* Dark theme hover */
+body.dark .sidebar-btn:hover {
+  background-color: rgba(255,255,255,0.1); /* subtle lighter background */
 }
 
 /* Optional: move remaining buttons lower in the sidebar */
@@ -397,96 +403,7 @@ body.dark .weather-bar {
   font-size: 1.3rem;
 }
 
-/*For the weather forecast */
-#weatherWidget {
-  padding: 15px;
-  border-radius: 16px;
-  margin: 20px auto;
-  max-width: 500px; /* wider for 5-day view */
-  text-align: center;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-/* Light theme */
-body.light #weatherWidget {
-  background: #eae8e0;
-  border: 1px solid #1d2028;
-  color: #111827;
-}
-
-/* Dark theme */
-body.dark #weatherWidget {
-  background: #1f2937;
-  border: 1px solid #374151;
-  color: #f9fafb;
-}
-
-.forecast-grid {
-  display: flex;
-  gap: 12px;
-  margin-top: 15px;
-  overflow-x: auto; /* allow scrolling on small screens */
-  scrollbar-width: thin;
-  padding-bottom: 6px;
-}
-
-.forecast-day {
-  flex: 1;
-  min-width: 80px;
-  text-align: center;
-  padding: 10px;
-  border-radius: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: default;
-}
-
-.forecast-day:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-}
-
-body.light .forecast-day {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  color: #111827;
-}
-
-body.dark .forecast-day {
-  background: #1f2937;
-  border: 1px solid #374151;
-  color: #f9fafb;
-}
-
-.forecast-day .date {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.forecast-day .icon {
-  font-size: 1.8rem;
-  margin: 6px 0;
-  transition: transform 0.3s ease;
-}
-
-.forecast-day:hover .icon {
-  transform: scale(1.2) rotate(5deg);
-}
-
-.forecast-day .temp {
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
 /*For page 2---------------------------*/
-
-/* Blog page styles */
-.page-title {
-  text-align: center;
-  margin: 20px 0;
-  font-size: 2rem;
-}
 
 .blog-container {
   display: grid;
@@ -553,6 +470,178 @@ body.dark .read-more {
 .read-more:hover {
   text-decoration: underline;
 }
+
+/*For the weather forecast widget*/
+
+#weatherWidget {
+  padding: 15px;
+  border-radius: 16px;
+  margin: 20px auto;
+  max-width: 500px; /* wider for 5-day view */
+  text-align: center;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Light theme */
+body.light #weatherWidget {
+  background: #eae8e0;
+  border: 1px solid #1d2028;
+  color: #111827;
+}
+
+/* Dark theme */
+body.dark #weatherWidget {
+  background: #0b1020;
+  border: 1px solid #374151;
+  color: #f9fafb;
+}
+
+.forecast-grid {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+  overflow-x: auto; /* allow scrolling on small screens */
+  scrollbar-width: thin;
+  padding-bottom: 6px;
+}
+
+.forecast-day {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.forecast-day:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+body.light .forecast-day {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+body.dark .forecast-day {
+  background: hsl(215, 28%, 17%);
+  border: 1px solid #374151;
+  color: #f9fafb;
+}
+
+.forecast-day .date {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.forecast-day .icon {
+  font-size: 1.8rem;
+  margin: 6px 0;
+  transition: transform 0.3s ease;
+}
+
+.forecast-day:hover .icon {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.forecast-day .temp {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.blog-page #weatherWidget {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: background 0.3s ease;
+}
+
+/* Today forecast */
+.blog-page .today-forecast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  border: 1px solid #374151;
+}
+
+.blog-page body.dark .today-forecast {
+  background: rgba(255,255,255,0.08);
+}
+
+.today-temp {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.today-icon {
+  font-size: 3rem;
+}
+
+.today-details {
+  text-align: center;
+  min-width: 150px;
+}
+
+.today-date, .today-description, .today-minmax {
+  margin: 0.2rem 0;
+}
+
+/* Upcoming days */
+.upcoming-forecast {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.forecast-day {
+  flex: 1 1 120px;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.03);
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+body.dark .forecast-day {
+  background: rgba(255,255,255,0.06);
+}
+
+.forecast-day:hover {
+  transform: translateY(-3px);
+}
+
+.forecast-date {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.forecast-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.forecast-temp {
+  font-size: 0.85rem;
+  color: #444;
+}
+
+body.dark .forecast-temp {
+  color: #ddd;
+}
+
 
 
 

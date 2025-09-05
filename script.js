@@ -327,7 +327,7 @@
     });
   }
 
-  // expose globally so sidebar can use it
+  // Expose globally so sidebar can use it
 window.renderFavorites = function() {
   grid.innerHTML = '';
   const favs = apps
@@ -425,12 +425,11 @@ fetch('sidebar.html')
   .catch(err => console.error('Failed to load sidebar:', err));
 
 function initSidebar() {
-  console.log("Sidebar initialized ✅");
-
   const menuBtn = document.getElementById('menuBtn');
   const sidebarExpand = document.getElementById('sidebarExpand');
   const favoritesBtn = document.getElementById('favoritesBtn');
   const themeToggle = document.getElementById('themeToggle');
+  const homeBtn = document.getElementById('homeBtn');
 
   const header = document.querySelector('header');
   const mainContent = document.querySelector('main');
@@ -446,12 +445,17 @@ function initSidebar() {
     });
   }
 
-  // Favorites button
+  // Home button
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      window.location.href = "index.html"; 
+    });
+  }
+
+  // Favorites button (main page only)
   if (favoritesBtn) {
     favoritesBtn.addEventListener('click', () => {
-      if (typeof renderFavorites === "function") {
-        renderFavorites();
-      }
+      if (typeof renderFavorites === "function") renderFavorites();
     });
   }
 
@@ -474,6 +478,62 @@ function initSidebar() {
     });
   }
 }
+
+function fetchForecast(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&current_weather=true&timezone=auto`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const widget = document.getElementById("weatherWidget");
+      if (!widget) return;
+
+      // Today's weather
+      const todayTemp = Math.round(data.current_weather.temperature);
+      const todayCode = data.current_weather.weathercode;
+      const todayMax = data.daily.temperature_2m_max[0];
+      const todayMin = data.daily.temperature_2m_min[0];
+      const todayDate = new Date(data.daily.time[0]).toLocaleDateString("en-US", { weekday: 'long', month:'short', day:'numeric' });
+      const todayIcon = getWeatherIcon(todayCode);
+
+      widget.querySelector(".today-temp").textContent = `${todayTemp}°C`;
+      widget.querySelector(".today-icon").textContent = todayIcon;
+      widget.querySelector(".today-date").textContent = todayDate;
+      widget.querySelector(".today-minmax").textContent = `Min ${todayMin}°C / Max ${todayMax}°C`;
+
+      // Upcoming days (skip today)
+      const upcoming = widget.querySelector(".upcoming-forecast");
+      upcoming.innerHTML = "";
+      for (let i = 1; i < 6; i++) {
+        const day = new Date(data.daily.time[i]).toLocaleDateString("en-US", { weekday: 'short' });
+        const min = data.daily.temperature_2m_min[i];
+        const max = data.daily.temperature_2m_max[i];
+        const icon = getWeatherIcon(data.daily.weathercode[i]);
+
+        const div = document.createElement("div");
+        div.className = "forecast-day";
+        div.innerHTML = `
+          <span class="forecast-date">${day}</span>
+          <span class="forecast-icon">${icon}</span>
+          <span class="forecast-temp">${min}°C / ${max}°C</span>
+        `;
+        upcoming.appendChild(div);
+      }
+    })
+    .catch(() => {
+      const widget = document.getElementById("weatherWidget");
+      if (widget) widget.textContent = "Failed to load forecast.";
+    });
+}
+
+// Run only if widget exists
+if (document.getElementById("weatherWidget") && navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => fetchForecast(pos.coords.latitude, pos.coords.longitude),
+    () => { document.getElementById("weatherWidget").textContent = "Location blocked."; }
+  );
+}
+
 
 
 
