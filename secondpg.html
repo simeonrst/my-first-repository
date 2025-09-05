@@ -58,9 +58,10 @@
     </article>
   </section>
 
-  <section class="forecast-section">
+<section class="forecast-section">
     <h1 class="page-title">Forecast Section</h1>
    <div id="weatherWidget" class="card">
+    <div class="loader" style="display:none;">Loading forecast...</div>
   <!-- Today -->
   <div class="today-forecast">
     <div class="today-temp">--°C</div>
@@ -78,99 +79,150 @@
   </div>
 </div>
 
-
 <!-- Load sidebar dynamically -->
 <script>
 fetch('sidebar.html')
-  .then(response => response.text())
+  .then(res => res.text())
   .then(html => {
+    // Inject sidebar
     document.getElementById('sidebarContainer').innerHTML = html;
 
-    // Sidebar functionality
-    const menuBtn = document.getElementById("menuBtn");
-    const sidebarExpand = document.getElementById("sidebarExpand");
-    const header = document.querySelector("header");
-    const mainContent = document.querySelector("main");
-    const footer = document.querySelector(".footer");
+    // Now sidebar exists → safe to attach all listeners
+    initSidebar();
+  })
+  .catch(err => console.error("Sidebar load failed:", err));
 
-    if (menuBtn) {
-      menuBtn.addEventListener("click", () => {
-        sidebarExpand.classList.toggle("active");
-        header.classList.toggle("shifted");
-        mainContent.classList.toggle("shifted");
-        if (footer) footer.classList.toggle("shifted");
-      });
-    }
+function initSidebar() {
+  console.log("Sidebar initialized!");
 
-    // Theme toggle
-    const themeToggle = document.getElementById("themeToggle");
-    if (themeToggle) {
-      let currentTheme = localStorage.getItem("theme") || "light";
-      document.body.classList.add(currentTheme);
-      themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebarExpand = document.getElementById('sidebarExpand');
+  const homeBtn = document.getElementById('homeBtn');
+  const themeToggle = document.getElementById('themeToggle');
+  const favoritesBtn = document.getElementById('favoritesBtn');
 
-      themeToggle.addEventListener("click", () => {
-        themeToggle.classList.add("animate");
-        setTimeout(() => {
-          themeToggle.classList.remove("animate");
-          document.body.classList.remove(currentTheme);
-          currentTheme = currentTheme === "dark" ? "light" : "dark";
-          document.body.classList.add(currentTheme);
-          localStorage.setItem("theme", currentTheme);
-          themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
-        }, 400);
-      });
-    }
+  const header = document.querySelector('header');
+  const mainContent = document.querySelector('main');
+  const footer = document.querySelector('.footer');
 
-    // Favorites button placeholder
-    const favoritesBtn = document.getElementById("favoritesBtn");
-    if (favoritesBtn) {
-      favoritesBtn.addEventListener("click", () => {
-        alert("Favorites are only available on the main page.");
-      });
-    }
-  });
+  // Menu toggle
+  if (menuBtn && sidebarExpand) {
+    menuBtn.addEventListener('click', () => {
+      sidebarExpand.classList.toggle('active');
+      header?.classList.toggle('shifted');
+      mainContent?.classList.toggle('shifted');
+      footer?.classList.toggle('shifted');
+    });
+  }
+
+  // 🔹 Home button redirect
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      window.location.href = "index.html"; 
+    });
+  }
+
+  // Theme toggle
+  if (themeToggle) {
+    let currentTheme = localStorage.getItem("theme") || "light";
+    document.body.classList.add(currentTheme);
+    themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+
+    themeToggle.addEventListener("click", () => {
+      themeToggle.classList.add("animate");
+      setTimeout(() => {
+        themeToggle.classList.remove("animate");
+        document.body.classList.toggle(currentTheme);
+        currentTheme = currentTheme === "dark" ? "light" : "dark";
+        document.body.classList.add(currentTheme);
+        localStorage.setItem("theme", currentTheme);
+        themeToggle.textContent = currentTheme === "dark" ? "🌙" : "☀️";
+      }, 400);
+    });
+  }
+
+  // Favorites button
+  if (favoritesBtn) {
+    favoritesBtn.addEventListener("click", () => {
+      if (typeof renderFavorites === "function") renderFavorites();
+    });
+  }
+}
 </script>
 
 <script>
 // Forecast widget on second page
 function fetchForecast(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&current_weather=true&timezone=auto`;
+
+  const widget = document.getElementById("weatherWidget");
+  if (!widget) return;
+
+  // Insert loader HTML before fetch
+  widget.innerHTML = `<div class="loader">Loading forecast...</div>`;
 
   fetch(url)
     .then(res => res.json())
     .then(data => {
-      const days = data.daily.time.slice(0, 5); // 5-day forecast
-      const max = data.daily.temperature_2m_max.slice(0, 5);
-      const min = data.daily.temperature_2m_min.slice(0, 5);
-
-      const forecastHTML = days.map((day, i) => {
-        return `
-          <div class="forecast-day">
-            <p><strong>${new Date(day).toLocaleDateString(undefined, { weekday: 'short' })}</strong></p>
-            <p>🌡️ ${min[i]}°C / ${max[i]}°C</p>
+      // Clear loader but keep widget div structure
+      widget.innerHTML = `
+        <div class="today-forecast">
+          <div class="today-temp">--°C</div>
+          <div class="today-icon">❔</div>
+          <div class="today-details">
+            <div class="today-date">Loading...</div>
+            <div class="today-minmax">Min --°C / Max --°C</div>
           </div>
-        `;
-      }).join("");
+        </div>
+        <div class="upcoming-forecast forecast-grid"></div>
+      `;
 
-      document.getElementById("weather").innerHTML = forecastHTML;
+      // Today's weather
+      const todayTemp = Math.round(data.current_weather.temperature);
+      const todayCode = data.current_weather.weathercode;
+      const todayMax = data.daily.temperature_2m_max[0];
+      const todayMin = data.daily.temperature_2m_min[0];
+      const todayDate = new Date(data.daily.time[0]).toLocaleDateString("en-US", { weekday: 'long', month:'short', day:'numeric' });
+      const todayIcon = getWeatherIcon(todayCode);
+
+      widget.querySelector(".today-temp").textContent = `${todayTemp}°C`;
+      widget.querySelector(".today-icon").textContent = todayIcon;
+      widget.querySelector(".today-date").textContent = todayDate;
+      widget.querySelector(".today-minmax").textContent = `Min ${todayMin}°C / Max ${todayMax}°C`;
+
+      // Upcoming days
+      const upcoming = widget.querySelector(".upcoming-forecast");
+      upcoming.innerHTML = ""; // clear any placeholder
+
+      for (let i = 1; i < 6; i++) {
+        const day = new Date(data.daily.time[i]).toLocaleDateString("en-US", { weekday: 'short' });
+        const min = data.daily.temperature_2m_min[i];
+        const max = data.daily.temperature_2m_max[i];
+        const icon = getWeatherIcon(data.daily.weathercode[i]);
+
+        const div = document.createElement("div");
+        div.className = "forecast-day";
+        div.innerHTML = `
+          <div class="forecast-date">${day}</div>
+          <div class="forecast-icon">${icon}</div>
+          <div class="forecast-temp">${min}°C / ${max}°C</div>
+        `;
+        upcoming.appendChild(div);
+      }
     })
     .catch(() => {
-      document.getElementById("weather").textContent = "Unable to load forecast.";
+      widget.innerHTML = `<div class="loader">Failed to load forecast.</div>`;
     });
 }
 
-// Get location and fetch forecast
-if (navigator.geolocation) {
+// Run if widget exists and geolocation available
+if (document.getElementById("weatherWidget") && navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     pos => fetchForecast(pos.coords.latitude, pos.coords.longitude),
-    () => { document.getElementById("weather").textContent = "Location access denied."; }
+    () => { document.getElementById("weatherWidget").textContent = "Location blocked."; }
   );
-} else {
-  document.getElementById("weather").textContent = "Geolocation not supported.";
 }
 </script>
-
 <script src="script.js"></script>
 </body>
 </html>

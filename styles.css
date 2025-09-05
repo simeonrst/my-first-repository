@@ -270,10 +270,6 @@ body.dark .sidebar-btn:hover {
   margin-top: 10px;
 }
 
-#returnBtn {
-  margin-left: 10px; /* keeps spacing consistent */
-}
-
 .pinned-divider {
   border: none;
   border-top: 1px dashed #ccc;
@@ -641,6 +637,7 @@ body.dark .forecast-day {
 body.dark .forecast-temp {
   color: #ddd;
 }
+
 
 
 

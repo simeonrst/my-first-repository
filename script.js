@@ -310,23 +310,6 @@
     URL.revokeObjectURL(a.href);
   });
 
-  const favoritesBtn = document.getElementById('favoritesBtn');
-  const returnBtn = document.getElementById('returnBtn');
-
-  if (favoritesBtn) {
-    favoritesBtn.addEventListener('click', () => {
-      renderFavorites();
-      returnBtn.style.display = 'inline-block';
-    });
-  }
-
-  if (returnBtn) {
-    returnBtn.addEventListener('click', () => {
-      render(search.value.trim().toLowerCase());
-      returnBtn.style.display = 'none';
-    });
-  }
-
   // Expose globally so sidebar can use it
 window.renderFavorites = function() {
   grid.innerHTML = '';
@@ -338,8 +321,6 @@ window.renderFavorites = function() {
 
   empty.style.display = favs.length ? 'none' : 'block';
   countTag.textContent = `${favs.length} favorite${favs.length === 1 ? '' : 's'}`;
-
-  returnBtn.style.display = 'inline-block';
 };
 
   importFile.addEventListener('change', async (e)=>{
@@ -372,64 +353,22 @@ window.renderFavorites = function() {
 const weatherIconEl = document.getElementById("weatherIcon");
 const weatherTempEl = document.getElementById("weatherTemp");
 
-function fetchCurrentWeather(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      const temp = Math.round(data.current_weather.temperature);
-      const code = data.current_weather.weathercode;
-      weatherTempEl.textContent = `${temp}°C`;
-      weatherIconEl.textContent = getWeatherIcon(code);
-    })
-    .catch(() => {
-      weatherTempEl.textContent = "--°C";
-      weatherIconEl.textContent = "❔";
-    });
-}
-
-function getWeatherIcon(code) {
-  if ([0].includes(code)) return "☀️";
-  if ([1, 2, 3].includes(code)) return "⛅";
-  if ([45, 48].includes(code)) return "🌫️";
-  if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return "🌧️";
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
-  if ([95, 96, 99].includes(code)) return "⛈️";
-  return "❔";
-}
-
-function goToForecastPage() {
-  window.location.href = "secondpg.html";
-}
-
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    pos => fetchCurrentWeather(pos.coords.latitude, pos.coords.longitude),
-    () => { 
-      weatherTempEl.textContent = "--°C";
-      weatherIconEl.textContent = "❔"; 
-    }
-  );
-} else {
-  weatherTempEl.textContent = "--°C";
-  weatherIconEl.textContent = "❔";
-}
-
 // SIDEBAR LOADER
 fetch('sidebar.html')
   .then(res => res.text())
   .then(html => {
     document.getElementById('sidebarContainer').innerHTML = html;
     initSidebar();
-  })
-  .catch(err => console.error('Failed to load sidebar:', err));
+    }
+  )
+  .catch(err => console.error("Sidebar load failed:", err));
 
 function initSidebar() {
+  console.log("Sidebar initialized!");
   const menuBtn = document.getElementById('menuBtn');
   const sidebarExpand = document.getElementById('sidebarExpand');
   const favoritesBtn = document.getElementById('favoritesBtn');
   const themeToggle = document.getElementById('themeToggle');
-  const homeBtn = document.getElementById('homeBtn');
 
   const header = document.querySelector('header');
   const mainContent = document.querySelector('main');
@@ -446,6 +385,7 @@ function initSidebar() {
   }
 
   // Home button
+  const homeBtn = document.getElementById('homeBtn');
   if (homeBtn) {
     homeBtn.addEventListener('click', () => {
       window.location.href = "index.html"; 
@@ -479,16 +419,67 @@ function initSidebar() {
   }
 }
 
+//Weather Forecast
+function fetchCurrentWeather(lat, lon) {
+  const weatherTempEl = document.querySelector("#weatherTemp");
+  const weatherIconEl = document.querySelector("#weatherIcon");
+  if (!weatherTempEl || !weatherIconEl) return;
+
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const temp = Math.round(data.current_weather.temperature);
+      const code = data.current_weather.weathercode;
+      weatherTempEl.textContent = `${temp}°C`;
+      weatherIconEl.textContent = getWeatherIcon(code);
+    })
+    .catch(() => {
+      weatherTempEl.textContent = "--°C";
+      weatherIconEl.textContent = "❔";
+    });
+}
+
+function getWeatherIcon(code) {
+  if ([0].includes(code)) return "☀️";
+  if ([1, 2, 3].includes(code)) return "⛅";
+  if ([45, 48].includes(code)) return "🌫️";
+  if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return "🌧️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  return "❔";
+}
+
+function goToForecastPage() {
+  window.location.href = "secondpg.html";
+}
+
 function fetchForecast(lat, lon) {
+  const widget = document.getElementById("weatherWidget");
+  if (!widget) return;
+
+  // Show loader
+  widget.innerHTML = `<div class="loader">Loading forecast...</div>`;
+
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&current_weather=true&timezone=auto`;
 
   fetch(url)
     .then(res => res.json())
     .then(data => {
-      const widget = document.getElementById("weatherWidget");
-      if (!widget) return;
+      // Build HTML structure
+      widget.innerHTML = `
+        <div class="today-forecast">
+          <div class="today-temp">--°C</div>
+          <div class="today-icon">❔</div>
+          <div class="today-details">
+            <div class="today-date">Loading...</div>
+            <div class="today-minmax">Min --°C / Max --°C</div>
+          </div>
+        </div>
+        <div class="upcoming-forecast forecast-grid"></div>
+      `;
 
-      // Today's weather
+      // Fill today's weather
       const todayTemp = Math.round(data.current_weather.temperature);
       const todayCode = data.current_weather.weathercode;
       const todayMax = data.daily.temperature_2m_max[0];
@@ -501,7 +492,7 @@ function fetchForecast(lat, lon) {
       widget.querySelector(".today-date").textContent = todayDate;
       widget.querySelector(".today-minmax").textContent = `Min ${todayMin}°C / Max ${todayMax}°C`;
 
-      // Upcoming days (skip today)
+      // Fill upcoming days
       const upcoming = widget.querySelector(".upcoming-forecast");
       upcoming.innerHTML = "";
       for (let i = 1; i < 6; i++) {
@@ -513,26 +504,30 @@ function fetchForecast(lat, lon) {
         const div = document.createElement("div");
         div.className = "forecast-day";
         div.innerHTML = `
-          <span class="forecast-date">${day}</span>
-          <span class="forecast-icon">${icon}</span>
-          <span class="forecast-temp">${min}°C / ${max}°C</span>
+          <div class="forecast-date">${day}</div>
+          <div class="forecast-icon">${icon}</div>
+          <div class="forecast-temp">${min}°C / ${max}°C</div>
         `;
         upcoming.appendChild(div);
       }
     })
     .catch(() => {
-      const widget = document.getElementById("weatherWidget");
-      if (widget) widget.textContent = "Failed to load forecast.";
+      widget.innerHTML = `<div class="loader">Failed to load forecast.</div>`;
     });
 }
 
-// Run only if widget exists
+// Run if widget exists and geolocation available
 if (document.getElementById("weatherWidget") && navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
-    pos => fetchForecast(pos.coords.latitude, pos.coords.longitude),
+    pos => {
+      fetchCurrentWeather(pos.coords.latitude, pos.coords.longitude);
+      fetchForecast(pos.coords.latitude, pos.coords.longitude);
+    },
     () => { document.getElementById("weatherWidget").textContent = "Location blocked."; }
   );
 }
+
+
 
 
 
