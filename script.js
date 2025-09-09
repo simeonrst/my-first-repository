@@ -373,6 +373,8 @@ function initSidebar() {
   const header = document.querySelector('header');
   const mainContent = document.querySelector('main');
   const footer = document.querySelector('.footer');
+  const settingsBtn = document.querySelector('.sidebar-bottom .sidebar-btn');
+  const settingsPanel = document.getElementById('settingsPanel');
 
   // Menu toggle
   if (menuBtn && sidebarExpand) {
@@ -417,6 +419,20 @@ function initSidebar() {
       }, 400);
     });
   }
+  
+  // Settings button
+  if (!settingsBtn || !settingsPanel) return;
+
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('show');
+  });
+
+  // Close if clicking again
+  document.addEventListener('click', (e) => {
+    if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
+      settingsPanel.classList.remove('show');
+    }
+  });
 }
 
 //Weather Forecast

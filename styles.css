@@ -236,12 +236,18 @@ main.shifted,
   color: gold;
 }
 
+/* Push only the settings button to the bottom */
+.sidebar-bottom {
+  margin-top: auto; /* pushes it down */
+  margin-bottom: 60px; /* space from bottom */
+}
+
 /* Group for the other buttons */
 .sidebar-buttons {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 10px; /* push other buttons below menu */
+  margin-top: 20px; /* push other buttons below menu */
 }
 
 /* Text labels hidden by default */
@@ -253,6 +259,63 @@ main.shifted,
 /* Show labels only when expanded */
 .sidebar.expanded .sidebar-btn span {
   display: inline;
+}
+
+/* Settings panel - hidden initially */
+.settings-panel {
+  position: fixed;
+  bottom: 100px;          /* distance from bottom of screen */
+  left: 100px;  
+  height: 45%;          /* sidebar width (60px) + 20px gap */
+  width: 220px;       /* panel width */
+  max-width: 90vw;
+  background: var(--sub);
+  border: 1px solid #222b3d;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  color: var(--text);     /* same as main text */
+  z-index: 50;                /* above everything else */
+  padding: 15px;
+  display: none;              /* hidden by default */
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Optional: animate panel */
+.settings-panel.show {
+  display: flex;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.settings-panel.hide {
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Content styling */
+.settings-content h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.settings-content p {
+  font-size: 0.9rem;
+  margin: 0.3rem 0;
+}
+
+body.light #settingsPanel {
+  background: #eae8e0;
+  color: #111827;
+  border: 1px solid #111;
+}
+
+body.dark #settingsPanel {
+  background: #1f2937;
+  color: #f9fafb;
+  border: 1px solid #505a6a;
 }
 
 /* Light theme hover (already exists) */
